@@ -1,0 +1,11 @@
+<?php
+
+return [
+    'enabled' => true,
+    'record_hits' => false,
+    'cache_seconds' => 300,
+    'except' => [
+        'login', 'logout', 'register', 'password', 'forgot-password',
+        'reset-password', 'email', 'user', 'account', 'checkout', 'cart',
+    ],
+];

@@ -1,0 +1,27 @@
+{
+    "name": "dkvadratu/dashboard-core",
+    "description": "Shared Filament dashboard features and a one-time Laravel application installer.",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.5",
+        "laravel/framework": "^13.0",
+        "filament/filament": "^5.5",
+        "achyutn/filament-log-viewer": "^2.2",
+        "sentry/sentry-laravel": "^4.25",
+        "laravel/mcp": "^1.1",
+        "laravel/sanctum": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dkvadratu\\DashboardCore\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dkvadratu\\DashboardCore\\DashboardCoreServiceProvider"
+            ]
+        }
+    }
+}

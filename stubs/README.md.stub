@@ -1,0 +1,53 @@
+# Project dashboard
+
+Laravel application powered by dkvadratu/dashboard-core.
+
+Add project setup and operations notes here. This file belongs to this application.
+
+## Default routes
+
+- `/adm` – Filament dashboard; `/adm/login` – sign in.
+- `/adm/queued-jobs` – database queue preview or unsupported driver notice.
+- `/adm/api-request-logs` – API and HTTP request logs.
+- `/adm/mcp-tokens` – create and revoke MCP tokens; `/mcp/users` – Users MCP endpoint (Bearer token).
+- `/uupp` – Laravel health check; `/api/status` – example API status.
+
+Request logging: `DASHBOARD_LOG_API`, `DASHBOARD_LOG_HTTP`, `DASHBOARD_LOGS_DETAILED` (all false by default). Detailed mode adds redacted request/response headers and structured bodies.
+
+The Filament sidebar footer displays `APP_VERSION` as a link to this application's README/CHANGELOG page. Set the version manually and refresh the configuration cache during deployment when needed.
+
+## Filament 2FA ir Laravel talpykla
+
+`config/cache.php` leidžia atkurti tik `Illuminate\Support\Carbon` ir `Carbon\CarbonImmutable` objektus. Tai padeda išvengti neteisingai atmestų el. pašto 2FA kodų, kai galiojimo data saugoma kaip objektas `file` ar `database` talpykloje. Kitos klasės neleidžiamos. Pakeitus konfigūraciją: `php artisan config:clear --no-interaction`; production konfigūracijos cache atkurk pagal diegimo eigą.
+
+## MCP and Boost
+
+Create a token under System → MCP tokens. A separate non-admin AI user is created on first use. Copy the token once and use `Authorization: Bearer <token>` with the MCP HTTP endpoint. The Users example lives in `app/Mcp/` and `routes/ai.php`; adapt it for this project.
+
+After dependency updates, run `php artisan dashboard:boost --no-interaction` in development to refresh agent guidelines and skills. Boost is a dev dependency; Laravel MCP and Sanctum are runtime dependencies.
+
+## Jei projektas turi viešąją svetainę / public routes
+
+### URL nukreipimų valdymas
+
+Pasirenkamas paketo modulis: paleisk `php artisan dashboard:install-redirects --no-interaction`, tada `php artisan migrate --no-interaction` ir `php artisan optimize:clear --no-interaction`. Filament meniu atsiras **Public web → Redirects** (`/adm/redirects`). Middleware registruojamas automatiškai.
+
+Commitink `config/dashboard-redirects.php`, sugeneruotą migraciją ir `.dashboard-redirects-installed`. Palaikomi tikslūs vietiniai keliai, 301/302, galiojimo data ir pasirenkamas hitų skaičiavimas. Privačius bei nestandartinius sisteminius kelius įtrauk į config `except`. Visos naudojimo ir atnaujinimo instrukcijos yra `vendor/dkvadratu/dashboard-core/README.md` skyriuje „URL nukreipimų valdymas“.
+
+### Viešųjų puslapių kešavimas
+
+Pasikartojančiam viešųjų puslapių turiniui rekomenduojama naudoti [spatie/laravel-responsecache](https://github.com/spatie/laravel-responsecache). Tai pasirenkamas paketas: `dashboard-core` jo automatiškai neįdiegia. Kešavimą junk tik prie pasirinktų viešųjų GET maršrutų; administravimo, autentifikacijos, MCP, health check ir personalizuotus puslapius palik už šios grupės. Numatyk talpyklos galiojimo laiką ir išvalymą pasikeitus turiniui.
+
+Diegimo žingsniai yra `vendor/dkvadratu/dashboard-core/README.md` skyriuje „Jei projektas turi viešąją svetainę / public routes“.
+
+### Slapukų valdymas ir BDAR
+
+Kai projektui reikia slapukų ir naudotojo sutikimų valdymo, rekomenduojama naudoti [dkvadratu/Laravel-cookie-consent](https://github.com/dkvadratu/Laravel-cookie-consent). Diegimo ir konfigūravimo instrukcijas žiūrėk paketo README; konfigūraciją pritaikyk konkretaus projekto BDAR reikalavimams.
+
+Tai pasirenkamas aplikacijos paketas: `dashboard-core` jo automatiškai neįdiegia. Slapukų sutikimų valdymas yra viena BDAR atitikties dalis, todėl vien paketo įdiegimas visos atitikties neužtikrina.
+
+## Modelių pokyčių istorija (pasirenkama)
+
+Kai reikia matyti, kas, ką ir kada pakeitė, naudok [spatie/laravel-activitylog](https://github.com/spatie/laravel-activitylog). Stebėjimą junk prie keičiamo modelio ir pasirink konkrečius laukus; prisijungęs vartotojas yra pakeitimo autorius. `User` pavyzdys: `name`, `email`, `is_admin`. Slaptažodžių, tokenų ir MFA paslapčių reikšmių neregistruok.
+
+Spatie v5 diegimo, modelio traito ir Filament 5 lentelės „Pokyčių istorija“ veiksmo pavyzdžiai yra įdiegto paketo `vendor/dkvadratu/dashboard-core/README.md` skyriuje „Modelių pokyčių istorija“. Paketas automatiškai neįdiegiamas.

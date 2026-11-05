@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Mcp\Tools;
+
+use App\Models\User;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
+use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Tool;
+use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
+
+#[Name('list-users')]
+#[Description('List users with cursor pagination. Returns only ID, name and email. Pass next_after_id as after_id to fetch the next page.')]
+#[IsReadOnly]
+class ListUsers extends Tool
+{
+    public function handle(Request $request): Response
+    {
+        if (! $request->user()?->tokenCan('users:read')) {
+            return Response::error('Permission denied: users:read is required.');
+        }
+
+        $data = $request->validate([
+            'after_id' => ['sometimes', 'integer', 'min:0'],
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
+        ]);
+        $limit = $data['limit'] ?? 20;
+        $users = User::query()
+            ->where('id', '>', $data['after_id'] ?? 0)
+            ->orderBy('id')
+            ->limit($limit + 1)
+            ->get(['id', 'name', 'email']);
+        $page = $users->take($limit);
+
+        return Response::json([
+            'users' => $page->values()->toArray(),
+            'next_after_id' => $users->count() > $limit ? $page->last()->id : null,
+        ]);
+    }
+
+    /** @return array<string, Type> */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'after_id' => $schema->integer()->min(0)->description('Last ID from the previous page; omit for the first page.'),
+            'limit' => $schema->integer()->min(1)->max(100)->description('Page size; default 20, maximum 100.'),
+        ];
+    }
+}

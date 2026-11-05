@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Mcp\Tools;
+
+use App\Models\User;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Laravel\Mcp\Request;
+use Laravel\Mcp\Response;
+use Laravel\Mcp\Server\Attributes\Description;
+use Laravel\Mcp\Server\Attributes\Name;
+use Laravel\Mcp\Server\Tool;
+
+#[Name('create-user')]
+#[Description('Create a regular user with name and email. Does not grant admin access or verify email. The random password is never returned; use the application password-reset flow to set a password.')]
+class CreateUser extends Tool
+{
+    public function handle(Request $request): Response
+    {
+        if (! $request->user()?->tokenCan('users:create')) {
+            return Response::error('Permission denied: users:create is required.');
+        }
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
+        ]);
+        $user = User::query()->create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Str::random(64),
+        ]);
+
+        return Response::json($user->only(['id', 'name', 'email']));
+    }
+
+    /** @return array<string, Type> */
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'name' => $schema->string()->max(255)->required(),
+            'email' => $schema->string()->format('email')->max(255)->required(),
+        ];
+    }
+}

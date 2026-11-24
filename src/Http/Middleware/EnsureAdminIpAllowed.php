@@ -26,7 +26,7 @@ class EnsureAdminIpAllowed
                 && $allowedIps !== []
                 && IpUtils::checkIp($clientIp, $allowedIps)
             ),
-            response('Forbidden', 403, [
+            response('Not Found', 404, [
                 'Content-Type' => 'text/plain; charset=UTF-8',
                 'Cache-Control' => 'no-store',
             ]),

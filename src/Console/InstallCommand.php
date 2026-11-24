@@ -97,6 +97,7 @@ class InstallCommand extends Command
         file_put_contents(base_path('.dashboard-installed'), "1\n");
         $this->info('Installed. Next: php artisan migrate; php artisan filament:assets; php artisan make:filament-user; php artisan dashboard:admin email@example.com');
         $this->warn('Configure mail, allowed IPs and SENTRY_LARAVEL_DSN. Enable email verification through the verification email.');
+        $this->line('For optional application settings, run php artisan dashboard:code-tips.');
 
         if (! $this->option('without-boost')) {
             return $this->call('dashboard:boost', ['--no-interaction' => true]);

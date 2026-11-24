@@ -4,6 +4,7 @@ namespace Dkvadratu\DashboardCore;
 
 use Dkvadratu\DashboardCore\Console\AdminCommand;
 use Dkvadratu\DashboardCore\Console\BoostCommand;
+use Dkvadratu\DashboardCore\Console\CodeTipsCommand;
 use Dkvadratu\DashboardCore\Console\InstallCommand;
 use Dkvadratu\DashboardCore\Console\InstallMcpCommand;
 use Dkvadratu\DashboardCore\Console\InstallRedirectsCommand;
@@ -36,7 +37,7 @@ class DashboardCoreServiceProvider extends ServiceProvider
         }
 
         if ($this->app->runningInConsole()) {
-            $this->commands([InstallCommand::class, InstallMcpCommand::class, InstallRedirectsCommand::class, BoostCommand::class, AdminCommand::class, PruneLogsCommand::class]);
+            $this->commands([InstallCommand::class, InstallMcpCommand::class, InstallRedirectsCommand::class, BoostCommand::class, CodeTipsCommand::class, AdminCommand::class, PruneLogsCommand::class]);
         }
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             $schedule->command('dashboard:prune-logs')->daily()->withoutOverlapping();

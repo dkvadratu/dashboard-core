@@ -4,13 +4,10 @@ namespace Dkvadratu\DashboardCore\Filament\Pages;
 
 use Filament\Pages\Page;
 use Illuminate\Support\Str;
-use UnitEnum;
 
 class ProjectReadme extends Page
 {
-    protected static ?string $navigationLabel = 'Project documentation';
-
-    protected static string|UnitEnum|null $navigationGroup = 'System';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected string $view = 'dashboard-core::document';
 

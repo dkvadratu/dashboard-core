@@ -19,7 +19,7 @@ class AdminCommand extends Command
 
             return self::FAILURE;
         }
-        if ($user->is_mcp_service_account && ! $this->option('revoke')) {
+        if (($user->is_mcp_service_account ?? false) && ! $this->option('revoke')) {
             $this->error('MCP service accounts cannot become administrators.');
 
             return self::FAILURE;

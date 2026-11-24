@@ -8,9 +8,7 @@
         "laravel/framework": "^13.0",
         "filament/filament": "^5.5",
         "achyutn/filament-log-viewer": "^2.2",
-        "sentry/sentry-laravel": "^4.25",
-        "laravel/mcp": "^1.1",
-        "laravel/sanctum": "^4.0"
+        "sentry/sentry-laravel": "^4.25"
     },
     "autoload": {
         "psr-4": {
@@ -23,5 +21,9 @@
                 "Dkvadratu\\DashboardCore\\DashboardCoreServiceProvider"
             ]
         }
+    },
+    "suggest": {
+        "laravel/mcp": "Required for the optional Users MCP server (^1.1).",
+        "laravel/sanctum": "Required for optional MCP bearer tokens (^4.0)."
     }
 }

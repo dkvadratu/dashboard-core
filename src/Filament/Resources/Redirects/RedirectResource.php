@@ -35,7 +35,7 @@ class RedirectResource extends Resource
     public static function getAuthorizationResponse(string|UnitEnum $action, ?Model $record = null): Response
     {
         $user = Filament::auth()->user();
-        if (! config('dashboard-redirects.enabled', false) || ! $user?->is_admin || $user?->is_mcp_service_account) {
+        if (! config('dashboard-redirects.enabled', false) || ! $user?->is_admin || ($user?->is_mcp_service_account ?? false)) {
             return Response::deny();
         }
 

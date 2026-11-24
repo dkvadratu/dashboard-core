@@ -18,6 +18,8 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Panel;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
+use Laravel\Mcp\Server;
+use Laravel\Sanctum\Sanctum;
 
 class DashboardPlugin implements Plugin
 {
@@ -39,13 +41,19 @@ class DashboardPlugin implements Plugin
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),
                 EmailAuthentication::make(),
-            ], isRequired: (bool) config('dashboard.mfa_required'))
+            ], isRequired: true)
             ->middleware([EnsureAdminIpAllowed::class], isPersistent: true)
             ->authMiddleware([Authenticate::class, EnsureDashboardAdmin::class], isPersistent: true)
-            ->pages([AdminDashboard::class, ProjectReadme::class, McpTokens::class])
+            ->pages([AdminDashboard::class, ProjectReadme::class])
             ->renderHook(PanelsRenderHook::SIDEBAR_FOOTER, fn (): View => view('dashboard-core::sidebar-footer'))
             ->resources([QueuedJobResource::class, ApiRequestLogResource::class])
             ->plugin(FilamentLogViewer::make());
+
+        if (config('dashboard.mcp_enabled', is_file(base_path('.dashboard-mcp-installed')))
+            && class_exists(Server::class)
+            && class_exists(Sanctum::class)) {
+            $panel->pages([McpTokens::class]);
+        }
 
         if (config('dashboard-redirects.enabled', false)) {
             $panel->resources([RedirectResource::class]);

@@ -8,7 +8,7 @@ use Illuminate\Support\ServiceProvider;
 
 class InstallCommand extends Command
 {
-    protected $signature = 'dashboard:install {--fresh : Adapt a fresh Laravel application, backing up its User and bootstrap files} {--without-boost : Skip development agent setup}';
+    protected $signature = 'dashboard:install {--fresh : Adapt a fresh Laravel application, backing up its User and bootstrap files} {--with-boost : Install or update optional development agent setup} {--without-boost : Skip development agent setup (legacy option)}';
 
     protected $description = 'Install application-owned dashboard scaffolding once';
 
@@ -17,7 +17,9 @@ class InstallCommand extends Command
         if (is_file(base_path('.dashboard-installed'))) {
             $this->info('Already installed. Application files were not changed. Update the package with Composer.');
 
-            return $this->option('without-boost') ? self::SUCCESS : $this->call('dashboard:boost', ['--no-interaction' => true]);
+            return $this->option('with-boost') && ! $this->option('without-boost')
+                ? $this->call('dashboard:boost', ['--no-interaction' => true])
+                : self::SUCCESS;
         }
 
         if (! $this->option('fresh')) {
@@ -34,7 +36,7 @@ class InstallCommand extends Command
                 return self::FAILURE;
             }
         }
-        foreach (['app/Providers/Filament/AdminPanelProvider.php', 'config/dashboard.php', 'routes/api.php', ...array_values(InstallMcpCommand::files())] as $target) {
+        foreach (['app/Providers/Filament/AdminPanelProvider.php', 'config/dashboard.php', 'routes/api.php'] as $target) {
             if (file_exists(base_path($target))) {
                 $this->error($target.' already exists. Integrate manually; no files changed.');
 
@@ -91,15 +93,12 @@ class InstallCommand extends Command
             file_put_contents($ignorePath, rtrim($ignores)."\n*.dashboard-backup\n");
         }
         ServiceProvider::addProviderToBootstrapFile(AdminPanelProvider::class);
-        if ($this->call('dashboard:install-mcp', ['--no-interaction' => true]) !== self::SUCCESS) {
-            return self::FAILURE;
-        }
         file_put_contents(base_path('.dashboard-installed'), "1\n");
         $this->info('Installed. Next: php artisan migrate; php artisan filament:assets; php artisan make:filament-user; php artisan dashboard:admin email@example.com');
         $this->warn('Configure mail, allowed IPs and SENTRY_LARAVEL_DSN. Enable email verification through the verification email.');
         $this->line('For optional application settings, run php artisan dashboard:code-tips.');
 
-        if (! $this->option('without-boost')) {
+        if ($this->option('with-boost') && ! $this->option('without-boost')) {
             return $this->call('dashboard:boost', ['--no-interaction' => true]);
         }
 

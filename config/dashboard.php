@@ -3,9 +3,10 @@
 return [
     'panel_id' => 'admin',
     'allowed_ips' => array_values(array_filter(array_map('trim', explode(',', (string) env('DASHBOARD_ALLOWED_IPS', '127.0.0.1,::1'))))),
+    // Preserve existing installations; new projects enable MCP through dashboard:install-mcp.
+    'mcp_enabled' => is_file(base_path('.dashboard-mcp-installed')),
     'mcp_token_abilities' => ['users:read' => 'List users', 'users:create' => 'Create users'],
     'mcp_user_email' => 'dashboard-ai@example.invalid',
-    'mfa_required' => true,
     'version' => env('APP_VERSION', '0.1.0'),
     'readme' => base_path('README.md'),
     'changelog' => base_path('CHANGELOG.md'),

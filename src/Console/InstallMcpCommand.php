@@ -4,6 +4,8 @@ namespace Dkvadratu\DashboardCore\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Laravel\Mcp\Server;
+use Laravel\Sanctum\Sanctum;
 
 class InstallMcpCommand extends Command
 {
@@ -24,6 +26,12 @@ class InstallMcpCommand extends Command
 
     public function handle(): int
     {
+        if (! class_exists(Server::class) || ! class_exists(Sanctum::class)) {
+            $this->error('Install optional runtime dependencies first: composer require "laravel/mcp:^1.1" "laravel/sanctum:^4.0". No files changed.');
+
+            return self::FAILURE;
+        }
+
         if (is_file(base_path('.dashboard-mcp-installed'))) {
             $this->info('MCP already installed. Application files were not changed.');
 
@@ -51,8 +59,8 @@ class InstallMcpCommand extends Command
             }
         }
         File::put(base_path('.dashboard-mcp-installed'), "1\n");
-        $this->info('Users MCP installed. Run php artisan migrate, then create a token in the MCP tokens admin page.');
-        $this->warn('Existing applications: add Laravel\\Sanctum\\HasApiTokens to User, cast is_mcp_service_account to boolean, and disallow service accounts in canAccessPanel. See README.');
+        $this->info('Users MCP installed. Complete the User changes in README, run php artisan migrate and php artisan optimize:clear, then create a token in the MCP tokens admin page.');
+        $this->warn('Add Laravel\\Sanctum\\HasApiTokens to User, cast is_mcp_service_account to boolean, and disallow service accounts in canAccessPanel. See README.');
 
         return self::SUCCESS;
     }
